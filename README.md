@@ -108,5 +108,11 @@ sleep 5
 /jffs/scripts/auth.sh start
 ```
 
-
+## 夹带私货
+部分学校网站使用校园网DNS,返回内网ip 210.34.0.14,不建议走其他DOH/DOT等
+```
+- DOMAIN-KEYWORD,xujc,DIRECT
+```
+学校10000以上端口不封,内网传输性能尚可(  
+不要干坏事喵
 
