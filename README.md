@@ -1,3 +1,6 @@
+## 感谢学长的圣遗物  
+献上加强版脚本造福学弟学妹
+
 ## 简介
 该shell脚本意在解决宿舍夜间断电后，第二天设备上电后需手动登录校园网(含电信网等)的问题。推荐使用openwrt、merlin等Linux内核系统的路由器。理论上该方法适用于所有无加密网页认证。
 
@@ -11,39 +14,16 @@
 (二)点击“login”<br>
 ![ready](https://github.com/LLLuk/the-campus-network-login-script/blob/main/pic/2.JPG)<br>
 
-(三)选择抓到的第一个文件右键复制<br>
+(三)选择抓到的第一个文件右键复制  
+笨蛋点击login时会刷新页面,前面抓的包当然没了  
+keep log 开(部分浏览器默认关的)  
 ![grip](https://github.com/LLLuk/the-campus-network-login-script/blob/main/pic/3.jpg)<br>
 
 (四)保存到记事本以供编辑，粘贴出来的大致样子：<br>
 ![example](https://github.com/LLLuk/the-campus-network-login-script/blob/main/pic/4.JPG)<br>
 
 #### 2、编辑并测试脚本
-第一步、将复制的KEY保存入一个txt文件中以供编辑。  
-第二步、删除开头curl字段和最后两行，如下：
-```
-curl
-```
-```
---compressed \
---insecure
-```
-最终获取的示例为（这些就是你的唯一KEY！请保存好不要外泄！）：
-```
-'http://10.100.1.5/eportal/InterFace.do?method=login' \
-  -H 'Connection: keep-alive' \
-  -H 'User-Agent: ****' \
-  -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
-  -H 'Accept: */*' \
-  -H 'Origin: http://10.100.1.5' \
-  -H 'Referer: ********' \
-  -H 'Accept-Language: ****' \
-  -H 'Cookie:******' \
-  --data-raw '************' \
-```
-第三步、根据脚本模板，在标记位置插入KEY，该脚本核心是利用curl命令上传KEY，例：
-```
-curl -s -X POST 'http://10.100.1.5/eportal/InterFace.do?method=login'
-```
+建议用加强版的
 
 在linux环境下测试脚本
 ```
