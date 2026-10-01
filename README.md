@@ -109,7 +109,7 @@ sleep 5
 ```
 
 ## 夹带私货
-部分学校网站使用校园网DNS,返回内网ip 210.34.0.14,不建议走其他DOH/DOT等
+部分学校网站使用校园网DNS(210.34.0.14),返回内网ip,不建议走其他DNS或者DOH/DOT解析
 ```
 - DOMAIN-KEYWORD,xujc,DIRECT
 ```
