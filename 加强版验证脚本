@@ -1,0 +1,68 @@
+#!/bin/sh
+# ============================================================
+#  校园网 eportal 自动认证脚本(OpenWrt/ImmortalWrt 通用模板)
+#  功能: 断网时自动向校园网认证服务器登录,指数退避重试
+#  建议脚本添加到开机运行一次,corn15min检查一次,测试一个月100%故障15min内自愈,无需人工干预
+#  有条件可以搞个 12v UPS 不然晚上玩手机没网(
+# ============================================================
+
+# ---------- 参数区(一般不要动) ----------
+MAX_RETRIES=3            # 每轮登录重试次数
+BASE_SLEEP=2             # 首次重试等待秒数
+AUTH_SERVER='10.100.1.5' # 认证服务器地址(校园网内网,一般不用改)
+USER_ID='你的学号'        # 例: CST26001
+PASSWORD_PLAIN='你的明文密码'  # 仅"路径1 GET直登"使用
+
+# ---------- 以下三段来自浏览器抓包(必须改的部分) ----------
+POST_DATA='userId=你的学号&password=【粘贴你抓到的RSA密码密文】&service=%25E4%25B8%25AD%25E5%259B%25BD%25E7%2594%25B5%25E4%25BF%25A1&queryString=【粘贴你抓到的queryString整段】&operatorPwd=&operatorUserId=&validcode=&passwordEncrypt=true'
+COOKIE='EPORTAL_COOKIE_USERNAME=你的学号; EPORTAL_COOKIE_SERVER=【粘贴你抓到的Cookie整段】; JSESSIONID=【同上】'
+REFERER='http://10.100.1.5/eportal/index.jsp?【粘贴你抓到的Referer问号后面整段】'
+
+# ---------- (别动) ----------
+if ping -c 1 -W 2 223.5.5.5 >/dev/null 2>&1; then
+    echo "$(date): Network already online"
+    exit 0
+fi
+echo "$(date): Network offline, starting login retry..."
+login_attempt() {
+    attempt=1
+    sleep_time=$BASE_SLEEP
+    while [ $attempt -le $MAX_RETRIES ]; do
+        echo "$(date): Login attempt $attempt/$MAX_RETRIES"
+
+        # 路径1: GET 直登(明文密码)
+        if [ -n "$PASSWORD_PLAIN" ]; then
+            response=$(curl -s "http://$AUTH_SERVER/eportal/InterFace.do?method=login&userId=$USER_ID&password=$PASSWORD_PLAIN")
+            if echo "$response" | grep -q '"result":"success"'; then
+                echo "$(date): GET login SUCCESS"
+                return 0
+            fi
+        fi
+
+        # 路径2: POST 完整表单
+        response2=$(curl -s -X POST "http://$AUTH_SERVER/eportal/InterFace.do?method=login" \
+            -H 'Accept: */*' \
+            -H 'Accept-Language: zh-CN,zh;q=0.9' \
+            -H 'Connection: keep-alive' \
+            -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8' \
+            -b "$COOKIE" \
+            -H "Origin: http://$AUTH_SERVER" \
+            -H "Referer: $REFERER" \
+            -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36' \
+            --data-raw "$POST_DATA")
+        if echo "$response2" | grep -q '"result":"success"'; then
+            echo "$(date): POST login SUCCESS"
+            return 0
+        fi
+
+        if [ $attempt -lt $MAX_RETRIES ]; then
+            echo "$(date): Login failed, waiting ${sleep_time}s..."
+            sleep $sleep_time
+            sleep_time=$((sleep_time * 2))
+        fi
+        attempt=$((attempt + 1))
+    done
+    echo "$(date): ALL LOGIN ATTEMPTS FAILED"
+    return 1
+}
+login_attempt
