@@ -18,6 +18,8 @@ POST_DATA='userId=你的学号&password=【粘贴你抓到的RSA密码密文】&
 COOKIE='EPORTAL_COOKIE_USERNAME=你的学号; EPORTAL_COOKIE_SERVER=【粘贴你抓到的Cookie整段】; JSESSIONID=【同上】'
 REFERER='http://10.100.1.5/eportal/index.jsp?【粘贴你抓到的Referer问号后面整段】'
 
+这个好像会变,但是我测试变了也不影响登录,但是为了安全还是你自己抓吧
+
 # ---------- (别动) ----------
 if ping -c 1 -W 2 223.5.5.5 >/dev/null 2>&1; then
     echo "$(date): Network already online"
